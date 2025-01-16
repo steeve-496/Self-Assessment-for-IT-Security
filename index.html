@@ -18,9 +18,12 @@
             const nameInput = document.getElementById("nameInput").value.trim();
             if (!nameInput) {
                 event.preventDefault(); // Prevent proceeding without a name
-                alert("Please enter your name to start the assessment.");
+                const modal = new bootstrap.Modal(document.getElementById('nameValidationModal'));
+                modal.show();
             } else {
                 document.getElementById("name").value = nameInput; // Save name to hidden field
+                document.getElementById("welcomeSection").style.display = "none"; // Hide welcome page
+                document.getElementById("questionnaire").style.display = "block"; // Show questionnaire
             }
         }
 
@@ -36,7 +39,7 @@
             } else if (score >= 3) {
                 resultMessage = `${name}, good, but there’s room for improvement. Review the areas where you answered 'No'.`;
             } else {
-                resultMessage = ` ${name}, it’s time to strengthen your IT security practices. Focus on addressing the gaps highlighted in this activity.`;
+                resultMessage = `${name}, it’s time to strengthen your IT security practices. Focus on addressing the gaps highlighted in this activity.`;
             }
 
             document.getElementById('resultContent').innerHTML = resultMessage;
@@ -53,8 +56,6 @@
                 q6: form.q6.value
             };
 
-            console.log(emailParams); // Debugging: Check parameters sent to EmailJS
-
             // Send email via EmailJS
             emailjs.send("service_wa893gj", "template_mif3uoy", emailParams).then(
                 function (response) {
@@ -70,14 +71,13 @@
         }
     </script>
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
+        body, html {
             margin: 0;
             padding: 0;
-            overflow-x: hidden;
+            overflow: hidden; /* Prevent scrolling on the whole page */
+            height: 100%;
         }
 
-        /* Welcome Section */
         .welcome-section {
             display: flex;
             flex-direction: column;
@@ -89,56 +89,64 @@
             color: white;
             padding: 20px;
         }
+
         .welcome-section h1 {
             font-size: 2.5rem;
             margin-bottom: 20px;
         }
+
         .welcome-section input {
             max-width: 400px;
             margin: 20px auto;
         }
+
         .welcome-section .btn {
             margin-top: 20px;
             font-size: 1.2rem;
             padding: 12px 30px;
         }
 
-        /* Questionnaire Section */
         .questionnaire {
-            padding: 50px 20px;
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             background-color: #f8f9fa;
+            overflow-y: auto; /* Allow scrolling in the questionnaire */
+            padding: 50px 20px;
         }
+
         .questionnaire h2 {
             text-align: center;
             margin-bottom: 40px;
             color: #007bff;
         }
+
         .question {
             margin-bottom: 30px;
         }
-        .modal-header {
-            background-color: #007bff;
-            color: white;
-        }
 
-        /* Smooth Scroll Animation */
-        html {
-            scroll-behavior: smooth;
+        .modal-header {
+            background-color: #dc3545;
+            color: white;
         }
 
         @media (max-width: 768px) {
             .welcome-section h1 {
                 font-size: 2rem;
             }
-            .welcome-section p {
-                font-size: 1rem;
+
+            .welcome-section input {
+                max-width: 300px;
             }
         }
     </style>
 </head>
 <body>
     <!-- Welcome Section -->
-    <div class="welcome-section">
+    <div class="welcome-section" id="welcomeSection">
         <h1>Welcome to the IT Security Self-Assessment</h1>
         <p>Enter your name to begin:</p>
         <input
@@ -147,7 +155,7 @@
             class="form-control text-center"
             placeholder="Enter your name"
         >
-        <a href="#questionnaire" class="btn btn-light btn-lg" id="startAssessment" onclick="validateNameAndProceed(event)">Start Assessment</a>
+        <button class="btn btn-light btn-lg" id="startAssessment" onclick="validateNameAndProceed(event)">Start Assessment</button>
     </div>
 
     <!-- Questionnaire Section -->
@@ -228,7 +236,25 @@
         </div>
     </div>
 
-    <!-- Modal -->
+    <!-- Validation Modal -->
+    <div class="modal fade" id="nameValidationModal" tabindex="-1" aria-labelledby="nameValidationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="nameValidationModalLabel">Missing Name</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Please enter your name before starting the assessment.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Result Modal -->
     <div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
